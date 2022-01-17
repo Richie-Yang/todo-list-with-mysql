@@ -9,7 +9,7 @@ const SEED_USER = {
 module.exports = {
   async up (queryInterface, Sequelize) {
    try {
-     /**
+      /**
      * Add seed commands here.
      *
      * Example:
@@ -18,23 +18,31 @@ module.exports = {
      *   isBetaMember: false
      * }], {});
     */
-     const userId = await queryInterface.bulkInsert('Users', [{
-       name: SEED_USER.name,
-       email: SEED_USER.email,
-       password: bcrypt.hashSync(SEED_USER.password, bcrypt.genSaltSync(10), null),
-       createdAt: new Date(),
-       updatedAt: new Date()
-     }], {})
+    const transaction = await queryInterface.sequelize.transaction()
 
-     return await queryInterface.bulkInsert('Todos',
-       Array.from(Array(10), (_, i) => ({
-         name: `name-${i}`,
-         UserId: userId,
-         createdAt: new Date(),
-         updatedAt: new Date()
-       }))
-       , {})
-   } catch (err) { console.log(err) }
+    const userId = await queryInterface.bulkInsert('Users', [{
+      name: SEED_USER.name,
+      email: SEED_USER.email,
+      password: bcrypt.hashSync(SEED_USER.password, bcrypt.genSaltSync(10), null),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }], { transaction })
+
+    await queryInterface.bulkInsert('Todos',
+      Array.from(Array(10), (_, i) => ({
+        name: `name-${i}`,
+        UserId: userId,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }))
+      , { transaction })
+
+     await transaction.commit()
+
+   } catch (err) { 
+     await transaction.rollback()
+     throw err
+    }
   },
 
   async down (queryInterface, Sequelize) {
@@ -45,8 +53,15 @@ module.exports = {
        * Example:
        * await queryInterface.bulkDelete('People', null, {});
        */
-      await queryInterface.bulkDelete('Todos', null, {})
-      return await queryInterface.bulkDelete('Users', null, {})
-    } catch (err) { console.log(err) }
+      const transaction = await queryInterface.sequelize.transaction()
+
+      await queryInterface.bulkDelete('Todos', null, { transaction })
+      await queryInterface.bulkDelete('Users', null, { transaction })
+      await transaction.commit()
+
+    } catch (err) {
+      await transaction.rollback()
+      throw err
+    }
   }
 };
