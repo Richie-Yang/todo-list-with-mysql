@@ -15,6 +15,7 @@ router.get('/users/logout', authenticator, userController.logout)
 router.get('/todos/:id', authenticator, todoController.getTodo)
 router.get('/todos/:id/edit', authenticator, todoController.editTodo)
 router.put('/todos/:id', authenticator, todoController.putTodo)
+router.delete('/todos/:id', authenticator, todoController.deleteTodo)
 router.get('/', authenticator, todoController.getTodos)
 
 

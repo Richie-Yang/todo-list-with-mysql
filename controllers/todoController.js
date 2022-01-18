@@ -51,5 +51,15 @@ module.exports = {
           .then(() => res.redirect(`/todos/${id}`))
       })
       .catch(err => console.log(err))
+  },
+
+  deleteTodo: (req, res) => {
+    const userId = req.user.id
+    const { id } = req.params
+
+    return Todo.findOne({ where: { userId, id } })
+      .then(todo => todo.destroy())
+      .then(() => res.redirect('/'))
+      .catch(err => console.log(err))
   }
 }
