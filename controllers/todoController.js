@@ -28,6 +28,19 @@ module.exports = {
       .catch(err => console.log(err))
   },
 
+  createTodo: (req, res) => {
+    return res.render('new')
+  },
+
+  postTodo: (req, res) => {
+    const UserId = req.user.id
+    const { name } = req.body
+
+    return Todo.create({ name, UserId })
+      .then(() => res.redirect('/'))
+      .catch(err => console.log(err))
+  },
+
   editTodo: (req, res) => {
     const { id } = req.params
 
@@ -40,12 +53,12 @@ module.exports = {
   },
 
   putTodo: (req, res) => {
-    const userId = req.user.id
+    const UserId = req.user.id
     const { id } = req.params
     const { name } = req.body
     const isDone = req.body.isDone === 'on'
 
-    return Todo.findOne({ where: { userId, id } })
+    return Todo.findOne({ where: { UserId, id } })
       .then(todo => {
         return todo.update({ isDone, name })
           .then(() => res.redirect(`/todos/${id}`))
@@ -54,10 +67,10 @@ module.exports = {
   },
 
   deleteTodo: (req, res) => {
-    const userId = req.user.id
+    const UserId = req.user.id
     const { id } = req.params
 
-    return Todo.findOne({ where: { userId, id } })
+    return Todo.findOne({ where: { UserId, id } })
       .then(todo => todo.destroy())
       .then(() => res.redirect('/'))
       .catch(err => console.log(err))
