@@ -12,6 +12,9 @@ router.get('/users/register', userController.registerPage)
 router.post('/users/register', userController.register)
 router.get('/users/logout', authenticator, userController.logout)
 
+router.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/users/login' }))
+router.get('/auth/facebook', passport.authenticate('facebook', { scope: ['email', 'public_profile'] }))
+
 router.get('/todos/new', authenticator, todoController.createTodo)
 router.post('/todos', authenticator, todoController.postTodo)
 router.get('/todos/:id/edit', authenticator, todoController.editTodo)

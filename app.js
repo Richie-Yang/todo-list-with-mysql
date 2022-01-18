@@ -3,12 +3,17 @@ const { engine } = require('express-handlebars')
 const methodOverride = require('method-override')
 const session = require('express-session')
 const flash = require('connect-flash')
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config()
+}
+
 const usePassport = require('./config/passport')
 const routes = require('./routes')
 const { serverError } = require('./middleware/errorHandler')
 
 const app = express()
-const PORT = 3000
+const PORT = process.env.PORT
 
 
 app.engine('hbs', engine({ defaultLayout: 'main', extname: '.hbs' }))
@@ -17,7 +22,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 
 app.use(session({
-  secret: '123',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true
 }))
