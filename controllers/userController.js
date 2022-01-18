@@ -16,37 +16,36 @@ module.exports = {
     return res.render('register')
   },
 
-  register: (req, res) => {
-    const { name, email, password, confirmPassword } = req.body
-    const errors = []
+  register: async (req, res, next) => {
+    try {
+      const { name, email, password, confirmPassword } = req.body
+      const errors = []
 
-    if (!name.trim() || !email || !password.trim() || !confirmPassword.trim() ) {
-      errors.push({ message: 'All fields are required' })
-    }
+      if (!name.trim() || !email || !password.trim() || !confirmPassword.trim()) {
+        errors.push({ message: 'All fields are required' })
+      }
 
-    if (password !== confirmPassword) {
-      errors.push({ message: 'Both password input are not matched' })
-    }
+      if (password !== confirmPassword) {
+        errors.push({ message: 'Both password input are not matched' })
+      }
 
-    if (errors.length) {
-      return res.render('register', { name, email, errors })
-    }
+      if (errors.length) {
+        return res.render('register', { name, email, errors })
+      }
 
-    return User.findOne({ where: { email } })
-      .then(user => {
-        if (user) {
-          errors.push({ message: 'User already exists' })
-          return res.render('register', { name, email, errors })
-        }
+      const user = await User.findOne({ where: { email } })
+      if (user) {
+        errors.push({ message: 'User already exists' })
+        return res.render('register', { name, email, errors })
+      }
 
-        return bcrypt.genSalt(10)
-          .then(salt => bcrypt.hash(password, salt))
-          .then(hash => {
-            return User.create({ name, email, password: hash })
-          })
-          .then(() => res.redirect('/users/login'))
-      })
-      .catch(err => console.log(err))
+      const salt = await bcrypt.genSalt(10)
+      const hash = await bcrypt.hash(password, salt)
+      await User.create({ name, email, password: hash })
+
+      return res.redirect('/users/login')
+      
+    } catch (err) { next(err) }
   },
 
   logout: (req, res) => {

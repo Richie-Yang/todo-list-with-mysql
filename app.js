@@ -5,6 +5,7 @@ const session = require('express-session')
 const flash = require('connect-flash')
 const usePassport = require('./config/passport')
 const routes = require('./routes')
+const { serverError } = require('./middleware/errorHandler')
 
 const app = express()
 const PORT = 3000
@@ -33,6 +34,11 @@ app.use((req, res, next) => {
 })
 
 app.use(routes)
+
+app.use((err, req, res, next) => {
+  console.log(err.stack)
+  return serverError(res)
+})
 
 
 app.listen(PORT, () => {
