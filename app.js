@@ -2,6 +2,7 @@ const express = require('express')
 const { engine } = require('express-handlebars')
 const methodOverride = require('method-override')
 const session = require('express-session')
+const flash = require('connect-flash')
 const usePassport = require('./config/passport')
 const routes = require('./routes')
 
@@ -20,11 +21,14 @@ app.use(session({
   saveUninitialized: true
 }))
 
+app.use(flash())
 usePassport(app)
 
 app.use((req, res, next) => {
   res.locals.user = req.user
   res.locals.isAuthenticated = req.isAuthenticated()
+  res.locals.success_msg = req.flash('success_msg')
+  res.locals.warning_msg = req.flash('warning_msg')
   next()
 })
 

@@ -10,16 +10,18 @@ module.exports = app => {
   app.use(passport.session())
 
   passport.use(new LocalStrategy({
-    usernameField: 'email'
-  }, (email, password, done) => {
+    usernameField: 'email', passReqToCallback: true
+  }, (req, email, password, done) => {
     return User.findOne({ where: { email } })
       .then(user => {
         if (!user) {
-          return done(null, false, { message: 'That email is not registered' })
+          req.flash('warning_msg', 'email or password incorrect')
+          return done(null, false)
         }
 
         if (!bcrypt.compareSync(password, user.password)) {
-          return done(null, false, { message: 'Email or password not corrected' })
+          req.flash('warning_msg', 'email or password incorrect')
+          return done(null, false)
         }
 
         return done(null, user)
